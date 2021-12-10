@@ -12,28 +12,47 @@ func main() {
     
     let lines = inputString.components(separatedBy: "\n")
         .filter { !$0.isEmpty }
-    
-    // Sample algorithm
-    var scoreboard = [String: Int]()
-    lines.forEach { line in
-        let (name, score) = parseLine(line)
-        scoreboard[name] = score
+
+    let points = [Character(")"): 3,
+                  Character("]"): 57,
+                  Character("}"): 1197,
+                  Character(">"): 25137
+    ]
+
+    var illegalCharacters = [Character]()
+
+    for line in lines {
+        let ar = Array(line)
+        if let char = findIllegalChar(in: ar) {
+            illegalCharacters.append(char)
+        }
     }
-    scoreboard
-        .sorted { lhs, rhs in
-            lhs.value > rhs.value
-        }
-        .forEach { name, score in
-            print("\(name) \(score) pts")
-        }
+
+    print(illegalCharacters.reduce(0, { partialResult, char in
+        partialResult + points[char]!
+    }))
 }
 
-func parseLine(_ line: String) -> (name: String, score: Int) {
-    let helper = RegexHelper(pattern: #"([\-\w]*)\s(\d+)"#)
-    let result = helper.parse(line)
-    let name = result[0]
-    let score = Int(result[1])!
-    return (name: name, score: score)
+func findIllegalChar(in line: [Character]) -> Character? {
+    var validClosingChars = [Character]()
+
+    for char in line {
+        if char == "[" {
+            validClosingChars.append("]")
+        } else if char == "<" {
+            validClosingChars.append(">")
+        } else if char == "{" {
+            validClosingChars.append("}")
+        } else if char == "(" {
+            validClosingChars.append(")")
+        } else {
+            let last = validClosingChars.removeLast()
+            if last != char {
+                return char
+            }
+        }
+    }
+    return nil
 }
 
 main()
